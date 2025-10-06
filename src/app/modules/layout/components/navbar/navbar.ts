@@ -1,19 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { httpResource } from '@angular/common/http';
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
+
+import { FormsModule } from '@angular/forms'; 
+
 import { environment } from '../../../../../environments/environment';
 import { CategoriesApiResponse } from '../../../../core/models/categories';
 import { Loader } from '../loader/loader';
+import { NavItems } from '../../../../core/models/constants';
 
-interface NavItem {
-  label: string
-  href: string
-  dropdown?: { label: string; href: string }[]
-}
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, Loader],
+  imports: [CommonModule, Loader, FormsModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })
@@ -23,21 +23,10 @@ export class Navbar {
   currentDate = ""
   isMobileMenuOpen = false
   isSearchOpen = false
-  searchQuery = ""
+  searchQuery = signal(""); 
   openDropdown: string | null = null
 
-  navItems: NavItem[] = [
-    { label: "Home", href: "/" },
-    {
-      label: "Categories",
-      href: "#",
-    },
-    { label: "Contact", href: "/contact" },
-    {
-      label: "About",
-      href: "#",
-    },
-  ]
+  navItems = NavItems;
 
   constructor() {
     this.updateDate()
@@ -97,5 +86,4 @@ export class Navbar {
   handleCategoryNavigation(categoryId: number) {
     console.log(categoryId);
   }
-
 }
