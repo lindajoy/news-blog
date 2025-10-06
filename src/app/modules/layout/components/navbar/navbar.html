@@ -1,19 +1,217 @@
-<h2>Categories List</h2>
-
 @switch (categoriesResource.status()) {
   @case ('loading') {
-    <p>Loading products...</p>
+    <app-loader/>
   }
  @case ('resolved') {
-  <ul>
-    @for (category of categoriesResource.value()?.categories; track category.id) {
-      <li>
-        <strong>{{ category.name }}</strong> (slug: {{ category.slug }})
-      </li>
-    } @empty {
-      <p>No categories found.</p>
-    }
-  </ul>
+ <div class="bg-black text-white border-b border-white/10 font-libre-baskerville">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between h-10 text-sm">
+      <div class="flex items-center gap-6">
+        <span class="hidden md:block">{{ currentDate }}</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/subscribe" class="hover:text-gray-300 transition-colors">
+          Subscribe
+        </a>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<header class="bg-white border-b border-gray-200 sticky top-0 z-50 font-libre-baskerville">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      Logo
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-black flex items-center justify-center">
+          <span class="text-white font-bold text-xl">N</span>
+        </div>
+        <span class="text-2xl font-bold text-black tracking-tight">NewsDaily</span>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-1">
+        @for (item of navItems; track item.label) {
+        <ng-container>
+          @if(item.label === 'Categories') {
+          <div class="relative dropdown-container">
+            <button
+              (click)="toggleDropdown(item.label, $event)"
+              class="px-4 py-2 text-black hover:bg-gray-100 transition-colors font-medium flex items-center gap-1"
+            >
+              {{ item.label }}
+              <svg
+                class="w-4 h-4 transition-transform"
+                [class.rotate-180]="openDropdown === item.label"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            @if(openDropdown === item.label) {
+            <div
+              class="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 shadow-lg"
+            >
+            @for (category of categoriesResource.value()?.categories; track category.id) {
+              <a href=""  class="block px-4 py-3 text-black hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0">{{ category.name }}</a>
+            } @empty {
+              <p>No categories found.</p>
+            } 
+            </div>
+          }
+          </div>
+        } @else {
+          <a
+          [href]="item.href"
+          class="px-4 py-2 text-black hover:bg-gray-100 transition-colors font-medium"
+        >
+          {{ item.label }}
+        </a>
+        }
+        </ng-container>
+      }
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <button
+          (click)="toggleSearch()"
+          class="p-2 hover:bg-gray-100 transition-colors"
+          [attr.aria-label]="isSearchOpen ? 'Close search' : 'Open search'"
+        >
+        @if(!isSearchOpen) {
+          <svg
+            class="w-5 h-5 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        }
+        @if(isSearchOpen) {
+
+          <svg
+            class="w-5 h-5 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        }
+        </button>
+
+        <button
+          (click)="toggleMobileMenu()"
+          class="lg:hidden p-2 hover:bg-gray-100 transition-colors"
+          aria-label="Toggle menu"
+        >
+        @if(!isMobileMenuOpen) {
+          <svg
+            class="w-6 h-6 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+        
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        }
+        @if(isMobileMenuOpen) {
+          <svg
+            class="w-6 h-6 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        }
+        </button>
+      </div>
+    </div>
+
+    @if(isSearchOpen) {
+    <div
+      class="border-t border-gray-200 py-4 animate-in slide-in-from-top-2"
+    >
+      <form (submit)="handleSearch($event)" class="max-w-2xl mx-auto">
+        <div class="relative">
+          <input
+            id="search-input"
+            type="search"
+            name="search"
+            placeholder="Search articles..."
+            class="w-full px-4 py-3 pr-12 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+          />
+          <button
+            type="submit"
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 transition-colors"
+            aria-label="Search"
+          >
+            <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+     @if(isMobileMenuOpen) {
+    <div
+      class="lg:hidden border-t border-gray-200 py-4 animate-in slide-in-from-top-2"
+    >
+      <nav class="flex flex-col">
+        @for (item of navItems; track item.label) {
+        <ng-container >
+          @if(item.label === 'Categories'){
+            <div>
+              <button
+                (click)="toggleDropdown(item.label, $event)"
+                class="w-full text-left px-4 py-3 text-black hover:bg-gray-100 transition-colors font-medium flex items-center justify-between"
+              >
+                {{ item.label }}
+                
+                <svg
+                  class="w-4 h-4 transition-transform"
+                  [class.rotate-180]="openDropdown == item.label"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              @if(openDropdown === item.label) {
+              <div class="bg-gray-50">
+                @for (category of categoriesResource.value()?.categories; track category.id) {
+                  <a href=""  class="block px-4 py-3 text-black hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0">{{ category.name }}</a>
+                } @empty {
+                  <p>No categories found.</p>
+                } 
+              </div>
+            }
+            </div>
+          }
+          @else {
+            <a
+            [href]="item.href"
+            class="block px-4 py-3 text-black hover:bg-gray-100 transition-colors font-medium"
+          >
+            {{ item.label }}
+          </a>
+          }
+        </ng-container>
+      }
+      </nav>
+    </div>
+  }
+  </div>
+</header>
 }
   @case ('error') {
     <div class="error">
