@@ -1,0 +1,24 @@
+<h2>Categories List</h2>
+
+@switch (categoriesResource.status()) {
+  @case ('loading') {
+    <p>Loading products...</p>
+  }
+ @case ('resolved') {
+  <ul>
+    @for (category of categoriesResource.value()?.categories; track category.id) {
+      <li>
+        <strong>{{ category.name }}</strong> (slug: {{ category.slug }})
+      </li>
+    } @empty {
+      <p>No categories found.</p>
+    }
+  </ul>
+}
+  @case ('error') {
+    <div class="error">
+      <p>Failed to load products.</p>
+      <pre>{{ categoriesResource.error()?.message }}</pre>
+    </div>
+  }
+}
